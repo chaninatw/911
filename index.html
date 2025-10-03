@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fake 911 Operator</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#111826; --accent:#2dd4bf; --danger:#ef4444; --ok:#22c55e; --muted:#94a3b8; --text:#e5e7eb;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,"Noto Sans Thai",sans-serif}
+    body{margin:0;background: radial-gradient(1200px 800px at 70% -10%, #122032 0%, #0b0f14 60%);}
+    .wrap{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{
+      width:min(980px,95vw);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+      padding:28px 24px 20px;
+      color:var(--text);
+      backdrop-filter: blur(6px);
+    }
+    .header{
+      display:flex;align-items:center;gap:12px;margin-bottom:16px
+    }
+    .logo{
+      width:44px;height:44px;border-radius:12px;background:conic-gradient(from 200deg, #ef4444, #facc15, #22c55e, #3b82f6, #ef4444);
+      display:grid;place-items:center;color:#0b0f14;font-weight:800;font-size:14px;letter-spacing:.5px;border:1px solid rgba(255,255,255,.25)
+    }
+    h1{margin:0;font-size:clamp(18px,2.2vw,24px);font-weight:700}
+    .sub{color:var(--muted);font-size:14px}
+    .screen{display:none;animation:fade .25s ease}
+    .screen.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .question{
+      padding:18px 18px;border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;background:rgba(17,24,38,.4);
+    }
+    .qtitle{font-size:clamp(18px,3vw,28px);font-weight:800;margin:0 0 10px}
+    .qdesc{color:#cbd5e1;margin:0 0 18px}
+    .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media(max-width:560px){.choices{grid-template-columns:1fr}}
+    .btn{
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color:var(--text); padding:14px 14px; border-radius:14px; cursor:pointer; font-weight:700;
+      transition:.15s transform ease, .15s background ease, .15s border ease;
+      text-align:left; display:flex; align-items:center; gap:12px;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.25)}
+    .btn:active{transform:translateY(0)}
+    .chip{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:999px;
+      font-size:13px;font-weight:900;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+    .result{
+      margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:700;display:none
+    }
+    .result.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#bbf7d0;display:block}
+    .result.bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca;display:block}
+    .actions{display:flex;gap:10px;margin-top:12px}
+    .pill{
+      border:1px solid rgba(255,255,255,.14);background:#0f172a;color:var(--text);
+      padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer
+    }
+    .pill.primary{background:var(--accent);color:#062921;border-color:transparent}
+    .hint{font-size:13px;color:#9fb1c8;margin-top:8px}
+    .divider{height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);margin:16px 0}
+    .footer{display:flex;justify-content:space-between;align-items:center;color:#9fb1c8;font-size:12px;margin-top:6px}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:rgba(255,255,255,.06);
+      padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.18)}
+    /* Fullscreen autoplay fallback overlay */
+    .overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;z-index:50
+    }
+    .overlay.show{display:grid}
+    .overlay .box{
+      background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px;max-width:420px;width:92%;
+      text-align:center;color:#e5e7eb;box-shadow:0 20px 60px rgba(0,0,0,.5)
+    }
+    .overlay h2{margin:0 0 10px;font-size:22px}
+    .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" role="main" aria-live="polite">
+      <div class="header">
+        <div class="logo" aria-hidden="true">911</div>
+        <div>
+          <h1>ศูนย์รับแจ้งเหตุ (จำลอง) — Fake 911 Operator</h1>
+          <div class="sub">เปิดเสียงเพื่อความสมจริง • ระบบจะเล่นไฟล์เสียงอัตโนมัติ</div>
+        </div>
+      </div>
+
+      <!-- Screen 1 -->
+      <section id="screen1" class="screen active" aria-labelledby="q1-title">
+        <div class="question">
+          <h2 id="q1-title" class="qtitle">แจ้งสถานที่เกิดเหตุ</h2>
+          <p class="qdesc">กรุณาเลือกตัวเลือกให้ถูกต้อง</p>
+          <div class="choices">
+            <button class="btn" data-choice="A">
+              <span class="chip">A</span> จุด A
+            </button>
+            <button class="btn" data-choice="B">
+              <span class="chip">B</span> จุด B
+            </button>
+            <button class="btn" data-choice="C">
+              <span class="chip">C</span> จุด C
+            </button>
+            <button class="btn" data-choice="D">
+              <span class="chip">D</span> จุด D
+            </button>
+          </div>
+          <div id="res1" class="result" role="status" aria-live="assertive"></div>
+          <div class="actions">
+            <button id="next1" class="pill primary" style="display:none">ถัดไป</button>
+            <button id="retry1" class="pill" style="display:none">ลองอีกครั้ง</button>
+          </div>
+          <div class="hint">คำตอบที่ถูกต้องของข้อนี้คือ <span class="kbd">B</span></div>
+        </div>
+      </section>
+
+      <div class="divider" aria-hidden="true"></div>
+
+      <!-- Screen 2 -->
+      <section id="screen2" class="screen" aria-labelledby="q2-title">
+        <div class="question">
+          <h2 id="q2-title" class="qtitle">แจ้งเบาะแสผู้ต้องสงสัย</h2>
+          <p class="qdesc">เลือกตัวเลือกให้ถูกต้อง</p>
+          <div class="choices">
+            <button class="btn" data-choice="X">
+              <span class="chip">X</span> เบาะแส X
+            </button>
+            <button class="btn" data-choice="Y">
+              <span class="chip">Y</span> เบาะแส Y
+            </button>
+            <button class="btn" data-choice="Z">
+              <span class="chip">Z</span> เบาะแส Z
+            </button>
+          </div>
+          <div id="res2" class="result" role="status" aria-live="assertive"></div>
+          <div class="actions">
+            <button id="finish" class="pill primary" style="display:none">เริ่มใหม่</button>
+            <button id="retry2" class="pill" style="display:none">ลองอีกครั้ง</button>
+            <button id="replay" class="pill">เล่นเสียงอีกครั้ง</button>
+          </div>
+          <div class="hint">
+            <!-- IMPORTANT: You asked “correct answer = A” but choices are X/Y/Z. Adjust here if needed. -->
+            คำตอบที่ถูกต้องของข้อนี้ตั้งไว้เป็น <span class="kbd">X</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span>ไฟล์เสียง: <code class="kbd">911operator.mp4</code></span>
+        <span>เดโม่เพื่อการเรียนรู้เท่านั้น</span>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hidden audio -->
+  <audio id="opsAudio" preload="auto" src="https://raw.githubusercontent.com/chaninatw/911/main/911operator.mp4"></audio>
+
+  <!-- Autoplay fallback overlay -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="ov-title">
+    <div class="box">
+      <h2 id="ov-title">ต้องการเปิดเสียงสายเข้าจำลอง</h2>
+      <p style="margin:6px 0 14px;color:#c7d2fe">เบราว์เซอร์บางตัวบล็อกเสียงอัตโนมัติ โปรดกดปุ่มเพื่อเริ่มเล่น</p>
+      <button id="tapToPlay" class="pill primary">เล่นเสียง</button>
+    </div>
+  </div>
+
+  <script>
+    // ----- Audio playback with graceful fallback -----
+    const audioEl = document.getElementById('opsAudio');
+    const overlay = document.getElementById('overlay');
+    const tapBtn  = document.getElementById('tapToPlay');
+
+    async function tryPlay() {
+      try {
+        audioEl.currentTime = 0;
+        await audioEl.play();
+        overlay.classList.remove('show');
+      } catch (e) {
+        // Likely autoplay blocked -> show overlay
+        overlay.classList.add('show');
+      }
+    }
+    window.addEventListener('load', () => {
+      // Attempt autoplay as soon as we can
+      tryPlay();
+    });
+    tapBtn.addEventListener('click', tryPlay);
+
+    // ----- Simple screen state machine -----
+    const s1 = document.getElementById('screen1');
+    const s2 = document.getElementById('screen2');
+    const res1 = document.getElementById('res1');
+    const res2 = document.getElementById('res2');
+    const next1 = document.getElementById('next1');
+    const retry1 = document.getElementById('retry1');
+    const retry2 = document.getElementById('retry2');
+    const finish = document.getElementById('finish');
+    const replay = document.getElementById('replay');
+
+    // Configurable answers
+    const ANSWER_Q1 = 'B';
+    // You asked "correct answer = A" but the provided choices are X/Y/Z.
+    // Set to 'X' by default; change to 'Y' or 'Z' if desired.
+    const ANSWER_Q2 = 'X';
+
+    // Utility to reset UI of a screen
+    function resetScreen(screenIndex){
+      if (screenIndex === 1){
+        res1.className = 'result';
+        res1.textContent = '';
+        next1.style.display = 'none';
+        retry1.style.display = 'none';
+      } else {
+        res2.className = 'result';
+        res2.textContent = '';
+        finish.style.display = 'none';
+        retry2.style.display = 'none';
+      }
+    }
+
+    // Bind choices for screen 1
+    s1.querySelectorAll('.btn[data-choice]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const choice = btn.getAttribute('data-choice');
+        const ok = choice === ANSWER_Q1;
+        res1.textContent = ok ? 'ถูกต้อง' : 'ยังไม่ใช่ ลองใหม่อีกครั้ง';
+        res1.className = 'result ' + (ok ? 'ok' : 'bad');
+        next1.style.display = ok ? 'inline-block' : 'none';
+        retry1.style.display = ok ? 'none' : 'inline-block';
+        // play a subtle cue
+        try { audioEl.play().catch(()=>{}); } catch(e){}
+      });
+    });
+
+    // Bind actions for screen 1
+    next1.addEventListener('click', ()=>{
+      s1.classList.remove('active');
+      s2.classList.add('active');
+      resetScreen(2);
+      // optional small audio nudge
+      try { audioEl.play().catch(()=>{}); } catch(e){}
+    });
+    retry1.addEventListener('click', ()=> resetScreen(1));
+
+    // Bind choices for screen 2
+    s2.querySelectorAll('.btn[data-choice]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const choice = btn.getAttribute('data-choice');
+        const ok = choice === ANSWER_Q2;
+        res2.textContent = ok ? 'ถูกต้อง' : 'ไม่ถูกต้อง ลองอีกครั้ง';
+        res2.className = 'result ' + (ok ? 'ok' : 'bad');
+        finish.style.display = ok ? 'inline-block' : 'none';
+        retry2.style.display = ok ? 'none' : 'inline-block';
+      });
+    });
+
+    // Bind actions for screen 2
+    retry2.addEventListener('click', ()=> resetScreen(2));
+    finish.addEventListener('click', ()=>{
+      // Restart flow
+      s2.classList.remove('active');
+      s1.classList.add('active');
+      resetScreen(1);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    replay.addEventListener('click', tryPlay);
+
+    // Keyboard a11y: Enter to activate focused button
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' && document.activeElement?.classList.contains('btn')){
+        document.activeElement.click();
+      }
+    });
+  </script>
+</body>
+</html>
