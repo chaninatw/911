@@ -21,9 +21,7 @@
       color:var(--text);
       backdrop-filter: blur(6px);
     }
-    .header{
-      display:flex;align-items:center;gap:12px;margin-bottom:16px
-    }
+    .header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
     .logo{
       width:44px;height:44px;border-radius:12px;background:conic-gradient(from 200deg, #ef4444, #facc15, #22c55e, #3b82f6, #ef4444);
       display:grid;place-items:center;color:#0b0f14;font-weight:800;font-size:14px;letter-spacing:.5px;border:1px solid rgba(255,255,255,.25)
@@ -34,7 +32,7 @@
     .screen.active{display:block}
     @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     .question{
-      padding:18px 18px;border:1px solid rgba(255,255,255,.08);
+      padding:18px;border:1px solid rgba(255,255,255,.08);
       border-radius:18px;background:rgba(17,24,38,.4);
     }
     .qtitle{font-size:clamp(18px,3vw,28px);font-weight:800;margin:0 0 10px}
@@ -44,7 +42,7 @@
     .btn{
       border:1px solid rgba(255,255,255,.12);
       background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      color:var(--text); padding:14px 14px; border-radius:14px; cursor:pointer; font-weight:700;
+      color:var(--text); padding:14px; border-radius:14px; cursor:pointer; font-weight:700;
       transition:.15s transform ease, .15s background ease, .15s border ease;
       text-align:left; display:flex; align-items:center; gap:12px;
     }
@@ -52,9 +50,7 @@
     .btn:active{transform:translateY(0)}
     .chip{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:999px;
       font-size:13px;font-weight:900;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
-    .result{
-      margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:700;display:none
-    }
+    .result{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:700;display:none}
     .result.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#bbf7d0;display:block}
     .result.bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca;display:block}
     .actions{display:flex;gap:10px;margin-top:12px}
@@ -68,6 +64,27 @@
     .footer{display:flex;justify-content:space-between;align-items:center;color:#9fb1c8;font-size:12px;margin-top:6px}
     .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:rgba(255,255,255,.06);
       padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.18)}
+
+    /* Dialer */
+    .dialer{
+      display:grid;grid-template-columns:1fr;gap:14px;align-items:center;justify-items:center
+    }
+    .display{
+      width:100%;max-width:420px;height:64px;border-radius:14px;border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;font-size:28px;font-weight:800;letter-spacing:2px
+    }
+    .digits{display:grid;grid-template-columns:repeat(3,100px);gap:12px;justify-content:center}
+    @media(max-width:420px){.digits{grid-template-columns:repeat(3,minmax(0,1fr));width:100%}}
+    .key{
+      width:100px;height:64px;border-radius:14px;border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.06);font-size:22px;font-weight:900;color:var(--text);cursor:pointer
+    }
+    @media(max-width:420px){.key{width:100%;}}
+    .callbar{display:flex;gap:10px;justify-content:center}
+    .call{background:var(--ok);color:#052811}
+    .del{background:#1e293b;color:#cbd5e1}
+    .err{color:#fecaca;font-size:13px}
     /* Fullscreen autoplay fallback overlay */
     .overlay{
       position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;z-index:50
@@ -87,29 +104,58 @@
       <div class="header">
         <div class="logo" aria-hidden="true">911</div>
         <div>
-          <h1>ศูนย์รับแจ้งเหตุฉุกเฉิน — 911 Operator</h1>
-          <div class="sub">เปิดเสียงเพื่อความสมจริง • ระบบจะเล่นไฟล์เสียงอัตโนมัติ</div>
+          <h1>ศูนย์รับแจ้งเหตุ (จำลอง) — Fake 911 Operator</h1>
+          <div class="sub">ขั้นที่ 1: กดหมายเลขโทรก่อน • เล่นเสียงสายเข้าเมื่อกดถูก</div>
         </div>
       </div>
 
+      <!-- Screen 0: Dialer -->
+      <section id="screen0" class="screen active" aria-labelledby="dial-title">
+        <div class="question">
+          <h2 id="dial-title" class="qtitle">โทรออกหา 911</h2>
+          <p class="qdesc">กรอกหมายเลขแล้วกดโทร • จะเริ่มเล่นเสียงอัตโนมัติเมื่อหมายเลขถูกต้อง</p>
+          <div class="dialer">
+            <div class="display">
+              <input id="dialInput" aria-label="หมายเลขโทรศัพท์" inputmode="numeric" pattern="[0-9]*"
+                     style="all:unset;width:100%;padding:0 8px;font-size:28px;letter-spacing:3px"
+                     maxlength="12" placeholder="–––" />
+              <button id="clearBtn" class="pill del">ลบ</button>
+            </div>
+            <div class="digits" aria-label="แป้นกดตัวเลข">
+              <button class="key" data-k="1">1</button>
+              <button class="key" data-k="2">2</button>
+              <button class="key" data-k="3">3</button>
+              <button class="key" data-k="4">4</button>
+              <button class="key" data-k="5">5</button>
+              <button class="key" data-k="6">6</button>
+              <button class="key" data-k="7">7</button>
+              <button class="key" data-k="8">8</button>
+              <button class="key" data-k="9">9</button>
+              <div></div>
+              <button class="key" data-k="0">0</button>
+              <div></div>
+            </div>
+            <div class="callbar">
+              <button id="callBtn" class="pill call">โทรออก</button>
+            </div>
+            <div id="dialErr" class="err" role="status" aria-live="assertive" style="display:none">หมายเลขไม่ถูกต้อง ลองอีกครั้ง</div>
+            <div class="hint">หมายเลขที่ถูกต้องตั้งไว้เป็น <span class="kbd">911</span> (แก้ได้ที่บรรทัด <span class="kbd">const PHONE_OK</span>)</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider" aria-hidden="true"></div>
+
       <!-- Screen 1 -->
-      <section id="screen1" class="screen active" aria-labelledby="q1-title">
+      <section id="screen1" class="screen" aria-labelledby="q1-title">
         <div class="question">
           <h2 id="q1-title" class="qtitle">แจ้งสถานที่เกิดเหตุ</h2>
-          <p class="qdesc">โปรดระบุสถานที่เกิดเหตุ</p>
+          <p class="qdesc">กรุณาเลือกตัวเลือกให้ถูกต้อง</p>
           <div class="choices">
-            <button class="btn" data-choice="A">
-              <span class="chip">A</span> จุด A
-            </button>
-            <button class="btn" data-choice="B">
-              <span class="chip">B</span> จุด B
-            </button>
-            <button class="btn" data-choice="C">
-              <span class="chip">C</span> จุด C
-            </button>
-            <button class="btn" data-choice="D">
-              <span class="chip">D</span> จุด D
-            </button>
+            <button class="btn" data-choice="A"><span class="chip">A</span> จุด A</button>
+            <button class="btn" data-choice="B"><span class="chip">B</span> จุด B</button>
+            <button class="btn" data-choice="C"><span class="chip">C</span> จุด C</button>
+            <button class="btn" data-choice="D"><span class="chip">D</span> จุด D</button>
           </div>
           <div id="res1" class="result" role="status" aria-live="assertive"></div>
           <div class="actions">
@@ -126,17 +172,11 @@
       <section id="screen2" class="screen" aria-labelledby="q2-title">
         <div class="question">
           <h2 id="q2-title" class="qtitle">แจ้งเบาะแสผู้ต้องสงสัย</h2>
-          <p class="qdesc">เลือกผู้ต้องสงสัย</p>
+          <p class="qdesc">เลือกตัวเลือกให้ถูกต้อง</p>
           <div class="choices">
-            <button class="btn" data-choice="X">
-              <span class="chip">X</span> เบาะแส X
-            </button>
-            <button class="btn" data-choice="Y">
-              <span class="chip">Y</span> เบาะแส Y
-            </button>
-            <button class="btn" data-choice="Z">
-              <span class="chip">Z</span> เบาะแส Z
-            </button>
+            <button class="btn" data-choice="X"><span class="chip">X</span> เบาะแส X</button>
+            <button class="btn" data-choice="Y"><span class="chip">Y</span> เบาะแส Y</button>
+            <button class="btn" data-choice="Z"><span class="chip">Z</span> เบาะแส Z</button>
           </div>
           <div id="res2" class="result" role="status" aria-live="assertive"></div>
           <div class="actions">
@@ -144,10 +184,7 @@
             <button id="retry2" class="pill" style="display:none">ลองอีกครั้ง</button>
             <button id="replay" class="pill">เล่นเสียงอีกครั้ง</button>
           </div>
-          <div class="hint">
-            <!-- IMPORTANT: You asked “correct answer = A” but choices are X/Y/Z. Adjust here if needed. -->
-            คำตอบที่ถูกต้องของข้อนี้ตั้งไว้เป็น <span class="kbd">X</span>
-          </div>
+          <div class="hint">ตั้งค่าเฉลยเป็น <span class="kbd">X</span> (ปรับได้ที่ <span class="kbd">ANSWER_Q2</span>)</div>
         </div>
       </section>
 
@@ -171,28 +208,14 @@
   </div>
 
   <script>
-    // ----- Audio playback with graceful fallback -----
-    const audioEl = document.getElementById('opsAudio');
-    const overlay = document.getElementById('overlay');
-    const tapBtn  = document.getElementById('tapToPlay');
+    // ====== Config ======
+    const PHONE_OK  = '911'; // <- Change this to any number you like (e.g., '191', '1669', '02-123-4567')
+    const ANSWER_Q1 = 'B';
+    // You said "A" for step 2 but options are X/Y/Z; default to 'X' (change to 'Y' or 'Z' if needed).
+    const ANSWER_Q2 = 'X';
 
-    async function tryPlay() {
-      try {
-        audioEl.currentTime = 0;
-        await audioEl.play();
-        overlay.classList.remove('show');
-      } catch (e) {
-        // Likely autoplay blocked -> show overlay
-        overlay.classList.add('show');
-      }
-    }
-    window.addEventListener('load', () => {
-      // Attempt autoplay as soon as we can
-      tryPlay();
-    });
-    tapBtn.addEventListener('click', tryPlay);
-
-    // ----- Simple screen state machine -----
+    // ====== Elements ======
+    const s0 = document.getElementById('screen0');
     const s1 = document.getElementById('screen1');
     const s2 = document.getElementById('screen2');
     const res1 = document.getElementById('res1');
@@ -203,28 +226,80 @@
     const finish = document.getElementById('finish');
     const replay = document.getElementById('replay');
 
-    // Configurable answers
-    const ANSWER_Q1 = 'B';
-    // You asked "correct answer = A" but the provided choices are X/Y/Z.
-    // Set to 'X' by default; change to 'Y' or 'Z' if desired.
-    const ANSWER_Q2 = 'X';
+    const dialInput = document.getElementById('dialInput');
+    const dialErr   = document.getElementById('dialErr');
+    const callBtn   = document.getElementById('callBtn');
+    const clearBtn  = document.getElementById('clearBtn');
+    const keys      = Array.from(document.querySelectorAll('.key'));
 
-    // Utility to reset UI of a screen
-    function resetScreen(screenIndex){
-      if (screenIndex === 1){
-        res1.className = 'result';
-        res1.textContent = '';
-        next1.style.display = 'none';
-        retry1.style.display = 'none';
-      } else {
-        res2.className = 'result';
-        res2.textContent = '';
-        finish.style.display = 'none';
-        retry2.style.display = 'none';
+    const audioEl = document.getElementById('opsAudio');
+    const overlay = document.getElementById('overlay');
+    const tapBtn  = document.getElementById('tapToPlay');
+
+    // ====== Audio helpers ======
+    async function tryPlay() {
+      try {
+        audioEl.currentTime = 0;
+        await audioEl.play();
+        overlay.classList.remove('show');
+      } catch (e) {
+        overlay.classList.add('show'); // show manual play prompt
       }
     }
 
-    // Bind choices for screen 1
+    // ====== Dialer logic ======
+    function normalize(num){
+      return (num || '').replace(/[^\d]/g,'');
+    }
+    function showDialError(show){
+      dialErr.style.display = show ? 'block' : 'none';
+    }
+    function goToQuestions(){
+      // Move to screen 1 after dialing correctly and attempt audio
+      s0.classList.remove('active');
+      s1.classList.add('active');
+      // Start audio now
+      tryPlay();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function verifyDial(){
+      const input = normalize(dialInput.value);
+      const target = normalize(PHONE_OK);
+      if (input === target && input.length){
+        showDialError(false);
+        goToQuestions();
+      } else {
+        showDialError(true);
+      }
+    }
+
+    // Dialer UI bindings
+    keys.forEach(k => {
+      k.addEventListener('click', ()=>{
+        dialInput.value += k.dataset.k;
+      });
+    });
+    clearBtn.addEventListener('click', ()=> {
+      dialInput.value = '';
+      showDialError(false);
+      dialInput.focus();
+    });
+    callBtn.addEventListener('click', verifyDial);
+    dialInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ verifyDial(); }
+    });
+
+    // ====== Screen 1 bindings ======
+    function resetScreen(idx){
+      if (idx === 1){
+        res1.className = 'result'; res1.textContent = '';
+        next1.style.display = 'none'; retry1.style.display = 'none';
+      } else if (idx === 2){
+        res2.className = 'result'; res2.textContent = '';
+        finish.style.display = 'none'; retry2.style.display = 'none';
+      }
+    }
+
     s1.querySelectorAll('.btn[data-choice]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const choice = btn.getAttribute('data-choice');
@@ -233,22 +308,19 @@
         res1.className = 'result ' + (ok ? 'ok' : 'bad');
         next1.style.display = ok ? 'inline-block' : 'none';
         retry1.style.display = ok ? 'none' : 'inline-block';
-        // play a subtle cue
-        try { audioEl.play().catch(()=>{}); } catch(e){}
       });
     });
 
-    // Bind actions for screen 1
     next1.addEventListener('click', ()=>{
       s1.classList.remove('active');
       s2.classList.add('active');
       resetScreen(2);
-      // optional small audio nudge
       try { audioEl.play().catch(()=>{}); } catch(e){}
+      window.scrollTo({top:0,behavior:'smooth'});
     });
     retry1.addEventListener('click', ()=> resetScreen(1));
 
-    // Bind choices for screen 2
+    // ====== Screen 2 bindings ======
     s2.querySelectorAll('.btn[data-choice]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const choice = btn.getAttribute('data-choice');
@@ -260,19 +332,24 @@
       });
     });
 
-    // Bind actions for screen 2
     retry2.addEventListener('click', ()=> resetScreen(2));
     finish.addEventListener('click', ()=>{
-      // Restart flow
+      // Restart from dialer
       s2.classList.remove('active');
-      s1.classList.add('active');
-      resetScreen(1);
+      s1.classList.remove('active');
+      s0.classList.add('active');
+      resetScreen(1); resetScreen(2);
+      dialInput.value = ''; showDialError(false);
       window.scrollTo({top:0,behavior:'smooth'});
     });
 
     replay.addEventListener('click', tryPlay);
 
-    // Keyboard a11y: Enter to activate focused button
+    // Autoplay attempt on load (won't play until dialed, but preps permissions)
+    window.addEventListener('load', ()=> { /* wait for dial OK first */ });
+    tapBtn.addEventListener('click', tryPlay);
+
+    // Accessibility: press Enter to activate focused .btn
     document.addEventListener('keydown', (e)=>{
       if (e.key === 'Enter' && document.activeElement?.classList.contains('btn')){
         document.activeElement.click();
