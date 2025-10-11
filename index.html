@@ -1,186 +1,169 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Emergency Call Operator</title>
 <style>
-:root{
-  --bg:#0b0f14; --card:#111826; --accent:#2dd4bf; --danger:#ef4444;
-  --ok:#22c55e; --muted:#94a3b8; --text:#e5e7eb;
-}
-*{box-sizing:border-box;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
-body{margin:0;background:#0b0f14;color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh}
-.card{width:min(900px,95vw);background:#111826;padding:28px;border-radius:20px;box-shadow:0 0 40px #0008}
-h1{margin:0 0 6px;font-size:24px;font-weight:800}
-.sub{color:var(--muted);font-size:14px;margin-bottom:16px}
-.screen{display:none;animation:fade .25s ease}
-.screen.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.section{padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.03)}
-label{font-weight:700}
-input{width:100%;padding:12px 14px;margin-top:6px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
- background:rgba(255,255,255,.06);color:var(--text);font-size:16px}
-.row{display:flex;gap:10px;justify-content:center;margin-top:16px}
-button{cursor:pointer;border:none;font-weight:700;border-radius:999px;padding:10px 18px}
-button.primary{background:var(--accent);color:#062921}
-button.good{background:var(--ok);color:#052811}
-button.bad{background:var(--danger);color:#fff}
-.status{margin-top:12px;padding:10px 14px;border-radius:8px;font-weight:700;display:none}
-.status.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#bbf7d0;display:block}
-.status.bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fecaca;display:block}
-.display{width:100%;max-width:400px;height:60px;border-radius:12px;border:1px solid rgba(255,255,255,.15);
-background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:26px;font-weight:800}
-.digits{display:grid;grid-template-columns:repeat(3,100px);gap:10px;justify-content:center;margin-top:10px}
-.key{width:100px;height:60px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:22px;font-weight:900}
-@media(max-width:420px){.digits{grid-template-columns:repeat(3,1fr)}.key{width:100%}}
+  :root{
+    --bg:#0b0f14; --card:#111826; --accent:#2dd4bf;
+    --ok:#22c55e; --danger:#ef4444; --muted:#94a3b8; --text:#e5e7eb;
+  }
+  *{box-sizing:border-box;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
+  body{margin:0;background:radial-gradient(1100px 700px at 70% -10%, #122032 0%, #0b0f14 60%);
+       color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{width:min(900px,95vw);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.45);padding:30px}
+  h1{margin:0 0 6px;font-size:24px;font-weight:800}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .screen{display:none;animation:fade .25s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .section{padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.02)}
+  label{font-weight:700}
+  input{width:100%;padding:12px 14px;margin-top:6px;border-radius:10px;
+        border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);
+        color:var(--text);font-size:16px}
+  .row{display:flex;gap:10px;justify-content:center;margin-top:16px}
+  button{cursor:pointer;border:none;font-weight:700;border-radius:999px;padding:10px 18px}
+  button.primary{background:var(--accent);color:#062921}
+  button.good{background:var(--ok);color:#052811}
+  button.bad{background:var(--danger);color:#fff}
+  .status{margin-top:12px;padding:10px 14px;border-radius:8px;font-weight:700;display:none}
+  .status.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#bbf7d0;display:block}
+  .status.bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fecaca;display:block}
+  .display{width:100%;max-width:400px;height:60px;border-radius:12px;border:1px solid rgba(255,255,255,.15);
+           background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;
+           padding:0 12px;font-size:26px;font-weight:800}
+  .digits{display:grid;grid-template-columns:repeat(3,100px);gap:10px;justify-content:center;margin-top:10px}
+  .key{width:100px;height:60px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:22px;font-weight:900}
+  @media(max-width:420px){.digits{grid-template-columns:repeat(3,1fr)}.key{width:100%}}
 </style>
 </head>
 <body>
 <main class="card">
-<h1>Emergency Call Operator</h1>
+  <h1>Emergency Call Operator</h1>
 
-<!-- Screen 0 -->
-<section id="screen0" class="screen active">
-<div class="section">
-  <div class="display">
-    <input id="dialInput" inputmode="numeric" maxlength="8" placeholder="_ _ _ _ _ _ _ _"
-     style="all:unset;width:100%;padding:0 8px;font-size:28px;letter-spacing:3px" />
-    <button id="clearBtn" class="bad">Clear</button>
-  </div>
-  <div class="digits">
-    <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
-    <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
-    <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
-    <div></div><button class="key" data-k="0">0</button><div></div>
-  </div>
-  <div class="row"><button id="callBtn" class="good">Call</button></div>
-  <div id="dialErr" class="status bad" style="display:none">Incorrect number. Try again.</div>
-</div>
-</section>
-
-<!-- Screen 1 -->
-<section id="screen1" class="screen">
-<div class="section">
-  <h2>Incident Report</h2>
-  <p>Please complete the form. Your submission will be recorded with a timestamp.</p>
-  <form id="reportForm">
-    <label>Location of victim<input id="loc" required></label>
-    <label>Suspect name<input id="suspect" required></label>
-    <label>Reporter name<input id="reporter" required></label>
-    <div class="row">
-      <button id="submitBtn" class="primary" type="submit">Submit</button>
-      <button id="resetBtn" type="button">Reset</button>
+  <!-- Screen 0: Dialer -->
+  <section id="screen0" class="screen active">
+    <div class="section">
+      <div class="display">
+        <input id="dialInput" inputmode="numeric" maxlength="8"
+               style="all:unset;width:100%;padding:0 8px;font-size:28px;letter-spacing:3px"
+               placeholder="_ _ _ _ _ _ _ _" />
+        <button id="clearBtn" class="bad">Clear</button>
+      </div>
+      <div class="digits">
+        <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+        <div></div><button class="key" data-k="0">0</button><div></div>
+      </div>
+      <div class="row"><button id="callBtn" class="good">Call</button></div>
+      <div id="dialErr" class="status bad" style="display:none">Incorrect number. Try again.</div>
     </div>
-    <div id="formStatus" class="status"></div>
-  </form>
-</div>
-</section>
+  </section>
+
+  <!-- Screen 1: Incident Report -->
+  <section id="screen1" class="screen">
+    <div class="section">
+      <h2>Incident Report</h2>
+      <p>Please complete the form.</p>
+      <form id="reportForm">
+        <label>Location of victim
+          <input id="loc" required placeholder="Type location" />
+        </label>
+        <label>Suspect name
+          <input id="suspect" required placeholder="Type suspect name" />
+        </label>
+        <label>Reporter name
+          <input id="reporter" required placeholder="Your name" />
+        </label>
+        <div class="row">
+          <button id="submitBtn" class="primary" type="submit">Submit</button>
+          <button id="resetBtn" type="button">Reset</button>
+        </div>
+        <div id="formStatus" class="status"></div>
+      </form>
+    </div>
+  </section>
 </main>
 
 <script>
-const PHONE_OK='01327948';
-const APP_URL='https://script.google.com/macros/s/AKfycbzVkulHeQO31CWS5KZ4UrE__7SF7cq79Jxv5yjaHldE-2w-eLAqFM5Xvlw5WjFcut2Tcg/exec'; // <- paste your /exec URL here
+const PHONE_OK = '01327948';
+const SUSPECT_ACCEPT = [
+  'thanakorn “korn” wetchayanon',
+  'thanakorn "korn" wetchayanon',
+  'thanakorn wetchayanon',
+  'korn',
+  'thanakorn'
+];
+const LOCATION_ACCEPT = [
+  'สนามบินอู่ตะเภา',
+  'u-tapao rayong–pattaya international airport',
+  'u–tapao rayong–pattaya international airport',
+  'u-tapao international airport',
+  'u–tapao international airport',
+  'u-tapao airport',
+  'u–tapao airport'
+];
 
-const s0=document.getElementById('screen0'),s1=document.getElementById('screen1');
+function norm(s){
+  return (s||'')
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g,"'")
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g,'"')
+    .replace(/[\u2013\u2014]/g,"-")
+    .replace(/[^a-z0-9\u0E00-\u0E7F\s"'\-]/g,"")
+    .trim();
+}
+
+function show(el,on){el.style.display = on?'block':'none';}
+function setStatus(ok,msg){const box=document.getElementById('formStatus');
+  box.className='status '+(ok?'ok':'bad'); box.textContent=msg; show(box,true);
+}
+
+// dialer logic
+const s0=document.getElementById('screen0'), s1=document.getElementById('screen1');
 const dialInput=document.getElementById('dialInput');
-const callBtn=document.getElementById('callBtn');
-const clearBtn=document.getElementById('clearBtn');
 const dialErr=document.getElementById('dialErr');
-const keys=[...document.querySelectorAll('.key')];
-
-const form=document.getElementById('reportForm');
-const submitBtn=document.getElementById('submitBtn');
-const resetBtn=document.getElementById('resetBtn');
-const statusBox=document.getElementById('formStatus');
-
-function show(el,yes){el.style.display=yes?'block':'none';}
-function setStatus(ok,msg){statusBox.className='status '+(ok?'ok':'bad');statusBox.textContent=msg;show(statusBox,true);}
-
-keys.forEach(k=>k.addEventListener('click',()=>{
- if(dialInput.value.length<8) dialInput.value+=k.dataset.k;
-}));
-clearBtn.onclick=()=>{dialInput.value='';show(dialErr,false);};
-callBtn.onclick=verifyDial;
-dialInput.addEventListener('keydown',e=>{if(e.key==='Enter')verifyDial();});
-
-function playTone(){
- try{
- const ctx=new (window.AudioContext||window.webkitAudioContext)();
- const o=ctx.createOscillator(),g=ctx.createGain();
- o.connect(g).connect(ctx.destination);
- o.type='sine';o.frequency.value=440;g.gain.value=.2;
- o.start();o.stop(ctx.currentTime+.5);
- setTimeout(()=>ctx.close(),600);
- }catch{}
-}
-
-function verifyDial(){
- if(dialInput.value===PHONE_OK){
-   show(dialErr,false);playTone();
-   setTimeout(()=>{s0.classList.remove('active');s1.classList.add('active');},700);
- }else show(dialErr,true);
-}
-
-/* ---------- Staff check JSONP helpers ---------- */
-function genId(){return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>
- (c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
-}
-
-function jsonp(url){
- return new Promise(res=>{
-   const cb='cb_'+Math.random().toString(36).slice(2);
-   window[cb]=data=>{res(data);delete window[cb];script.remove();};
-   const script=document.createElement('script');
-   script.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
-   document.body.appendChild(script);
- });
-}
-
-async function waitForStaffCheck(id,onUpdate){
- const end=Date.now()+120000; // 2 min
- while(Date.now()<end){
-   const r=await jsonp(APP_URL+'?status=1&id='+encodeURIComponent(id));
-   if(r&&r.ok&&r.found){
-     const val=(r.staffCheck||'').trim().toLowerCase();
-     if(val){onUpdate(val);return;}
-   }
-   await new Promise(r=>setTimeout(r,3000));
- }
- onUpdate('');
-}
-
-/* ---------- Submit ---------- */
-form.addEventListener('submit',async e=>{
- e.preventDefault();show(statusBox,false);submitBtn.disabled=true;
- const id=genId();
- const data={
-   location:loc.value.trim(),
-   suspect:suspect.value.trim(),
-   reporter:reporter.value.trim(),
-   client_ts:new Date().toISOString(),
-   submissionId:id
- };
- if(!data.location||!data.suspect||!data.reporter){
-   setStatus(false,'Please complete all fields.');submitBtn.disabled=false;return;
- }
- try{
-   await fetch(APP_URL,{
-     method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-     body:JSON.stringify(data),mode:'no-cors'
-   });
-   setStatus(true,'Submitted. Waiting for staff check…');
-   await waitForStaffCheck(id,val=>{
-     if(val==='correct')setStatus(true,'✅ correct — mission clear');
-     else setStatus(false,'❌ location and suspect incorrect');
-   });
- }catch{
-   setStatus(false,'Network error. Please try again.');
- }finally{
-   submitBtn.disabled=false;form.reset();
- }
+document.querySelectorAll('.key').forEach(btn=>{
+  btn.onclick=()=>{ if(dialInput.value.length<8) dialInput.value+=btn.dataset.k; }
 });
-resetBtn.onclick=()=>{form.reset();show(statusBox,false);};
+document.getElementById('clearBtn').onclick=()=>{dialInput.value='';};
+document.getElementById('callBtn').onclick=()=>{
+  if(dialInput.value===PHONE_OK){
+    show(dialErr,false);
+    const audio=new Audio('https://github.com/chaninatw/911/blob/main/911operator.mp4?raw=true');
+    audio.play();
+    s0.classList.remove('active'); s1.classList.add('active');
+  }else{
+    show(dialErr,true);
+  }
+};
+
+// form logic
+const form=document.getElementById('reportForm');
+const resetBtn=document.getElementById('resetBtn');
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const suspect=norm(document.getElementById('suspect').value);
+  const loc=norm(document.getElementById('loc').value);
+  let suspectOK=SUSPECT_ACCEPT.some(v=>norm(v)===suspect);
+  let locOK=LOCATION_ACCEPT.some(v=>norm(v)===loc);
+
+  let result=[];
+  result.push('Suspect: '+(suspectOK?'✅ correct':'❌ incorrect'));
+  result.push('Location: '+(locOK?'✅ correct':'❌ incorrect'));
+
+  if(suspectOK && locOK){
+    result.push('✅ correct — mission clear');
+    setStatus(true,result.join(' | '));
+  }else{
+    setStatus(false,result.join(' | '));
+  }
+});
+resetBtn.onclick=()=>{form.reset();show(document.getElementById('formStatus'),false);}
 </script>
 </body>
 </html>
