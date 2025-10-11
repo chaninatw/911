@@ -1,259 +1,89 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Emergency Call Operator (Simulation)</title>
-  <style>
-    :root{
-      --bg:#0b0f14; --card:#111826; --accent:#2dd4bf; --danger:#ef4444; --ok:#22c55e; --muted:#94a3b8; --text:#e5e7eb;
-    }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
-    body{margin:0;background: radial-gradient(1200px 800px at 70% -10%, #122032 0%, #0b0f14 60%);color:var(--text)}
-    .wrap{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .card{
-      width:min(980px,95vw);
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:24px;
-      box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
-      padding:28px 24px 20px; backdrop-filter: blur(6px);
-    }
-    h1{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px);font-weight:800}
-    .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
-    .screen{display:none;animation:fade .25s ease}
-    .screen.active{display:block}
-    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-    .section{padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(17,24,38,.4)}
-    .title{font-size:clamp(18px,3vw,28px);font-weight:800;margin:0 0 10px}
-    .desc{color:#cbd5e1;margin:0 0 18px}
-    .divider{height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);margin:16px 0}
+<script>
+  // ... keep your existing variables (APP_URL, form, etc.)
 
-    /* Dialer */
-    .dialer{display:grid;gap:14px;align-items:center;justify-items:center}
-    .display{
-      width:100%;max-width:420px;height:64px;border-radius:14px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;
-      padding:0 12px;font-size:28px;font-weight:800;letter-spacing:2px
-    }
-    .digits{display:grid;grid-template-columns:repeat(3,100px);gap:12px;justify-content:center}
-    @media(max-width:420px){.digits{grid-template-columns:repeat(3,minmax(0,1fr));width:100%}}
-    .key{
-      width:100px;height:64px;border-radius:14px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.06);font-size:22px;font-weight:900;color:var(--text);cursor:pointer
-    }
-    @media(max-width:420px){.key{width:100%;}}
-    .row{display:flex;gap:10px;justify-content:center}
-    .pill{
-      border:1px solid rgba(255,255,255,.14);background:#0f172a;color:var(--text);
-      padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer
-    }
-    .pill.primary{background:var(--accent);color:#062921;border-color:transparent}
-    .pill.good{background:var(--ok);color:#052811}
-    .pill.warn{background:var(--danger)}
-    .err{color:#fecaca;font-size:13px;margin-top:4px}
+  // Generate a simple UUID
+  function genId(){
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  }
 
-    /* Form */
-    form{display:grid;gap:12px}
-    label{font-weight:700}
-    input[type="text"]{
-      width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.06);color:var(--text);font-size:16px
-    }
-    .hint{font-size:12px;color:#9fb1c8}
-    .status{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:700;display:none}
-    .status.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#bbf7d0;display:block}
-    .status.bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca;display:block}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <main class="card" role="main" aria-live="polite">
-      <h1>Emergency Call Operator</h1>
-      
-      <!-- Screen 0: Dialer -->
-      <section id="screen0" class="screen active">
-        <div class="section">
-          <h2 class="title">Dial to access</h2>
-                <div class="dialer">
-            <div class="display">
-              <input id="dialInput" inputmode="numeric" aria-label="Phone number"
-               style="all:unset;width:100%;padding:0 8px;font-size:28px;letter-spacing:3px"
-               maxlength="8" placeholder="_ _ _ _ _ _ _ _" />
-              <button id="clearBtn" class="pill">Clear</button>
-            </div>
-            <div class="digits" aria-label="Dial pad">
-              <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
-              <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
-              <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
-              <div></div><button class="key" data-k="0">0</button><div></div>
-            </div>
-            <div class="row">
-              <button id="callBtn" class="pill good">Call</button>
-            </div>
-            <div id="dialErr" class="err" role="status" aria-live="assertive" style="display:none">Incorrect number. Try again.</div>
-                </div>
-        </div>
-      </section>
-
-      <div class="divider" aria-hidden="true"></div>
-
-      <!-- Screen 1: Incident Report -->
-      <section id="screen1" class="screen">
-        <div class="section">
-          <h2 class="title">Incident Report</h2>
-          <p class="desc">Please complete the form. Your submission will be recorded with a timestamp.</p>
-
-          <form id="reportForm">
-            <div>
-              <label for="loc">Location of victim</label>
-              <input id="loc" name="location" type="text" required placeholder="e.g., 221B Baker Street, London" />
-            </div>
-
-            <div>
-              <label for="suspect">Suspect name</label>
-              <input id="suspect" name="suspect" type="text" required placeholder="e.g., John Doe" />
-            </div>
-
-            <div>
-              <label for="reporter">Reporter name</label>
-              <input id="reporter" name="reporter" type="text" required placeholder="Your name" />
-            </div>
-
-            <div class="row">
-              <button id="submitBtn" class="pill primary" type="submit">Submit</button>
-              <button id="resetBtn" class="pill" type="button">Reset</button>
-            </div>
-
-            <div id="formStatus" class="status" role="status" aria-live="assertive"></div>
-            <div class="hint">Data is set to Google Apps Script → appended to your Google Sheet. Server adds the official timestamp.</div>
-          </form>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script>
-    // ====== Config ======
-    const PHONE_OK = '01327948';
-    // Replace with your deployed Apps Script Web App URL (see section B below)
-    const APP_URL = 'https://script.google.com/macros/s/AKfycby-92lp2N8AvXHsKUzW1iV-XW13eedTq4pBIxIHqCgwKj0vd9MOI89Ij8_7tIZZUJL-5w/exec';
-
-    // ====== Elements ======
-    const s0 = document.getElementById('screen0');
-    const s1 = document.getElementById('screen1');
-    const dialInput = document.getElementById('dialInput');
-    const dialErr = document.getElementById('dialErr');
-    const callBtn = document.getElementById('callBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const keys = Array.from(document.querySelectorAll('.key'));
-
-    const form = document.getElementById('reportForm');
-    const statusBox = document.getElementById('formStatus');
-    const submitBtn = document.getElementById('submitBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    // ====== Simple "ringing tone" using WebAudio (beep-beep) ======
-    function playRingingTone(durationMs = 2500) {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const now = ctx.currentTime;
-        // Two short beeps: 440Hz for 0.25s, gap 0.15s, then 480Hz for 0.25s; repeat pattern
-        for (let i = 0; i < 6; i++) {
-          const start = now + i * 0.4;
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.type = 'sine';
-          o.frequency.value = i % 2 === 0 ? 440 : 480;
-          g.gain.value = 0.0;
-          o.connect(g).connect(ctx.destination);
-          o.start(start);
-          g.gain.setTargetAtTime(0.2, start, 0.005);
-          g.gain.setTargetAtTime(0.0, start + 0.25, 0.02);
-          o.stop(start + 0.3);
-        }
-        // Auto close after a while (helps some browsers)
-        setTimeout(()=>{ try{ctx.close()}catch(_){}} , durationMs + 300);
-      } catch(_) { /* no audio context available; ignore */ }
-    }
-
-    // ====== Helpers ======
-    function normalize(n){ return (n||'').replace(/[^\d]/g,''); }
-    function show(el, show){ el.style.display = show ? 'block' : 'none'; }
-    function setStatus(ok, msg){
-      statusBox.className = 'status ' + (ok ? 'ok' : 'bad');
-      statusBox.textContent = msg;
-      show(statusBox, true);
-    }
-
-    // ====== Dialer logic ======
-    keys.forEach(k => k.addEventListener('click', () => dialInput.value += k.dataset.k));
-    clearBtn.addEventListener('click', ()=>{ dialInput.value=''; dialErr.style.display='none'; dialInput.focus(); });
-    callBtn.addEventListener('click', verifyDial);
-    dialInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') verifyDial(); });
-
-    function verifyDial(){
-      const input = normalize(dialInput.value);
-      const target = normalize(PHONE_OK);
-      if (input === target && input.length){
-        dialErr.style.display='none';
-        // ring tone then move to form
-        playRingingTone(2500);
-        setTimeout(()=>{
-          s0.classList.remove('active');
-          s1.classList.add('active');
-          window.scrollTo({top:0,behavior:'smooth'});
-        }, 1200); // short ring before switching screen
-      } else {
-        dialErr.style.display='block';
-      }
-    }
-
-    // ====== Form submit ======
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      show(statusBox, false);
-      submitBtn.disabled = true;
-
-      const payload = {
-        location: document.getElementById('loc').value.trim(),
-        suspect: document.getElementById('suspect').value.trim(),
-        reporter: document.getElementById('reporter').value.trim(),
-        // client timestamp (server will add its own authoritative timestamp)
-        client_ts: new Date().toISOString()
-      };
-
-      if(!payload.location || !payload.suspect || !payload.reporter){
-        setStatus(false, 'Please complete all fields.');
-        submitBtn.disabled = false;
-        return;
-      }
-
-      try{
-        const res = await fetch(APP_URL, {
-          method: 'POST',
-          mode: 'cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json().catch(()=>({ok:false}));
-        if(res.ok && data && data.ok){
-          setStatus(true, 'Submitted. Thank you.');
-          form.reset();
-        }else{
-          setStatus(false, data?.error || 'Submission failed. Please try again.');
-        }
-      }catch(err){
-        setStatus(false, 'Network error. Please try again.');
-      }finally{
-        submitBtn.disabled = false;
-      }
+  // JSONP helper (bypass CORS)
+  function jsonp(url, cbName){
+    return new Promise((resolve)=>{
+      const script = document.createElement('script');
+      const callback = cbName || ('cb_' + Math.random().toString(36).slice(2));
+      window[callback] = (data)=>{ resolve(data); document.body.removeChild(script); delete window[callback]; };
+      script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + callback;
+      document.body.appendChild(script);
     });
+  }
 
-    resetBtn.addEventListener('click', ()=>{
+  // Poll staff check
+  async function waitForStaffCheck(submissionId, onUpdate){
+    // poll every 3s up to 2 minutes
+    const deadline = Date.now() + 120000;
+    while (Date.now() < deadline){
+      const url = APP_URL + '?status=1&id=' + encodeURIComponent(submissionId);
+      const res = await jsonp(url);
+      if (res && res.ok && res.found){
+        const val = String(res.staffCheck || '').trim().toLowerCase();
+        if (val){ // staff typed something
+          onUpdate(val);
+          return;
+        }
+      }
+      await new Promise(r=>setTimeout(r, 3000));
+    }
+    onUpdate(''); // timeout -> treat as not correct yet
+  }
+
+  // ----- submit handler (replace your existing one) -----
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    show(statusBox, false);
+    submitBtn.disabled = true;
+
+    const submissionId = genId();
+    const payload = {
+      location: document.getElementById('loc').value.trim(),
+      suspect:  document.getElementById('suspect').value.trim(),
+      reporter: document.getElementById('reporter').value.trim(),
+      client_ts: new Date().toISOString(),
+      submissionId
+    };
+
+    if(!payload.location || !payload.suspect || !payload.reporter){
+      setStatus(false, 'Please complete all fields.');
+      submitBtn.disabled = false; return;
+    }
+
+    try {
+      // Write row (no-cors POST)
+      await fetch(APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        mode: 'no-cors'
+      });
+
+      // Let the player know we are waiting for staff check
+      setStatus(true, 'Submitted. Waiting for staff check…');
+
+      // Start polling StaffCheck
+      await waitForStaffCheck(submissionId, (val)=>{
+        if (val === 'correct') {
+          setStatus(true, '✅ correct — mission clear');
+        } else {
+          setStatus(false, '❌ location and suspect incorrect');
+        }
+      });
+
+    } catch (err) {
+      setStatus(false, 'Network error. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
       form.reset();
-      show(statusBox, false);
-    });
-  </script>
-</body>
-</html>
+    }
+  });
+</script>
